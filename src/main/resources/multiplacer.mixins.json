@@ -1,9 +1,11 @@
 {
   "required": true,
-  "package": "eva.template.mixin.client",
+  "package": "eva.multiplacer.mixin",
   "compatibilityLevel": "JAVA_21",
+  "mixins": [
+  ],
   "client": [
-    "ExampleClientMixin"
+    "client.ItemStackMixin"
   ],
   "injectors": {
     "defaultRequire": 1

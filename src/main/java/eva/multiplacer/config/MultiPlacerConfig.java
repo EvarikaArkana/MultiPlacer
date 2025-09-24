@@ -1,33 +1,33 @@
-package eva.template.config;
+package eva.multiplacer.config;
 
-public class TemplateConfig {
+public class MultiPlacerConfig {
 
-    private static TemplateConfig INSTANCE;
-//    private static TemplateConfig SERVER_INSTANCE;
+    private static MultiPlacerConfig INSTANCE;
+//    private static MultiPlacerConfig SERVER_INSTANCE;
     private static final boolean[] readSinceLastUpdate = {false, false, false, false, false, false, false};
 
-    private TemplateConfig() {}
+    private MultiPlacerConfig() {}
 
-    public TemplateConfig(boolean hi) {
+    public MultiPlacerConfig(boolean hi) {
 
     }
 
-    public static TemplateConfig getInstance() {
+    public static MultiPlacerConfig getInstance() {
         if (INSTANCE == null) {
-            INSTANCE = new TemplateConfig();
+            INSTANCE = new MultiPlacerConfig();
         }
         return INSTANCE;
     }
 
-    public void updateConfigs(TemplateConfig config) {
+    public void updateConfigs(MultiPlacerConfig config) {
 
     }
 
-//    public static TemplateConfig getServerInstance() {
+//    public static MultiPlacerConfig getServerInstance() {
 //        return SERVER_INSTANCE;
 //    }
 
-//    private static void setServerInstance(TemplateConfig newInstance) {
+//    private static void setServerInstance(MultiPlacerConfig newInstance) {
 //        SERVER_INSTANCE = newInstance;
 //    }
 //    static List<String> getDef() {

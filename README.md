@@ -1,1 +1,1 @@
-Evarika's Template Mod
+Initial version of MultiPlacer
