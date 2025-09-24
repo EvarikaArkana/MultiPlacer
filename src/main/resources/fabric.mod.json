@@ -13,22 +13,22 @@
     "sources": "https://github.com/EvarikaArkana/template"
   },
   "license": "${mod_license}",
-  "icon": "assets/template/icon.png",
+  "icon": "assets/replacer/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
-      "eva.multiplacer.MultiPlacerMain"
+      "eva.replacer.RePlacerMain"
     ],
     "client": [
-      "eva.multiplacer.MultiPlacerClient"
+      "eva.replacer.RePlacerClient"
     ],
     "modmenu": [
-      "eva.multiplacer.config.MultiPlacerConfigScreen"
+      "eva.replacer.config.RePlacerConfigScreen"
     ]
   },
   "mixins": [
     {
-      "config": "multiplacer.mixins.json",
+      "config": "replacer.mixins.json",
       "environment": "client"
     }
   ],
@@ -50,15 +50,12 @@
       }
     },
     "mc-publish": {
-      "modrinth": "Q3aGKBEg",
-      "curseforge": 1266340,
+      "modrinth": "QZEAWDAW",
+      "curseforge": 1353044,
       "dependencies": [
-        "simply-dual-wielding(recommended){modrinth:simply-dual-wielding}",
-        "sdw(recommended){curseforge:simply-dual-wielding}",
-        "better-third-person(incompatible){modrinth:better-third-person}",
-        "betterthirdperson(incompatible){curseforge:better-third-person}"
+
       ]
     }
   },
-  "accessWidener": "multiplacer.accesswidener"
+  "accessWidener": "replacer.accesswidener"
 }

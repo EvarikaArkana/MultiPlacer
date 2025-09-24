@@ -1,8 +1,8 @@
-package eva.multiplacer.config;
+package eva.replacer.config;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import eva.multiplacer.MultiPlacerClient;
+import eva.replacer.RePlacerClient;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -24,7 +24,7 @@ public class JsonConfigHelper {
             folder.mkdir();
         }
         if (folder.isDirectory()) {
-            templateConfig = new File(folder, "multiplacer.json");
+            templateConfig = new File(folder, "replacer.json");
             boolean seemsValid;
             if (templateConfig.exists()) {
                 try {
@@ -38,11 +38,11 @@ public class JsonConfigHelper {
             }
             if (!templateConfig.exists() || !seemsValid) {
                 if (!seemsValid) {
-                    MultiPlacerClient.LOGGER.info("Found invalid config file, creating new config file at './config/moreshieldvariants.json'.");
+                    RePlacerClient.LOGGER.info("Found invalid config file, creating new config file at './config/moreshieldvariants.json'.");
                 }
                 try {
                     templateConfig.createNewFile();
-                    String json = configGson.toJson(MultiPlacerConfig.getInstance());
+                    String json = configGson.toJson(RePlacerConfig.getInstance());
                     FileWriter writer = new FileWriter(templateConfig);
                     writer.write(json);
                     writer.close();
@@ -56,8 +56,8 @@ public class JsonConfigHelper {
 
     public static void readFromConfig() {
         try {
-            MultiPlacerConfig config = configGson.fromJson(new FileReader(templateConfig), MultiPlacerConfig.class);
-            MultiPlacerConfig.getInstance().updateConfigs(config);
+            RePlacerConfig config = configGson.fromJson(new FileReader(templateConfig), RePlacerConfig.class);
+            RePlacerConfig.getInstance().updateConfigs(config);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -66,7 +66,7 @@ public class JsonConfigHelper {
 
     public static void writeToConfig() {
         try {
-            String json = configGson.toJson(MultiPlacerConfig.getInstance());
+            String json = configGson.toJson(RePlacerConfig.getInstance());
             FileWriter writer = new FileWriter(templateConfig, false);
             writer.write(json);
             writer.close();

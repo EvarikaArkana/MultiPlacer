@@ -1,6 +1,6 @@
 {
   "required": true,
-  "package": "eva.multiplacer.mixin",
+  "package": "eva.replacer.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
   ],

@@ -1,11 +1,11 @@
-package eva.multiplacer;
+package eva.replacer;
 
 import net.fabricmc.api.ModInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MultiPlacerMain implements ModInitializer {
-    public static final String MOD_ID = "multiplacer";
+public class RePlacerMain implements ModInitializer {
+    public static final String MOD_ID = "replacer";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     @Override
     public void onInitialize() {

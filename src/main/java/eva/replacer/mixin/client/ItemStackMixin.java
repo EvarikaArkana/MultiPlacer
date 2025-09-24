@@ -1,4 +1,4 @@
-package eva.multiplacer.mixin.client;
+package eva.replacer.mixin.client;
 
 
 import com.llamalad7.mixinextras.sugar.Local;
@@ -17,13 +17,14 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import static eva.multiplacer.MultiPlacerClient.modifierBind;
+import static eva.replacer.RePlacerClient.modifierBind;
 
 @Mixin(ItemStack.class)
 public class ItemStackMixin {
 
     @Unique ItemStack itstck = (ItemStack) (Object) this;
     @Unique boolean rePlacing = false;
+
     @Unique int[][] poslist = {{1, 0}, {1, 1}, {0, 1}, {-1, 1}, {-1, 0}, {-1, -1}, {0, -1}, {1, -1}};
 
     @Inject(

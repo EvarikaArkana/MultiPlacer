@@ -42,7 +42,7 @@ loom {
             sourceSet sourceSets.main
         }
     }
-    accessWidenerPath = file("src/main/resources/multiplacer.accesswidener")
+    accessWidenerPath = file("src/main/resources/replacer.accesswidener")
 }
 
 def getReleaseVersion(minecraftVersion) {
