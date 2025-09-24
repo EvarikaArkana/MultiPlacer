@@ -17,6 +17,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import static eva.multiplacer.MultiPlacerClient.modifierBind;
+
 @Mixin(ItemStack.class)
 public class ItemStackMixin {
 
@@ -32,6 +34,7 @@ public class ItemStackMixin {
             )
     )
     private void placeAgain(UseOnContext context, CallbackInfoReturnable<InteractionResult> cir, @Local InteractionResult result) {
+        if (!modifierBind.isDown()) return;
         if (!(result instanceof InteractionResult.Success) || rePlacing || !(itstck.getItem() instanceof BlockItem)) return;
 
         Player player = context.getPlayer();
@@ -66,7 +69,7 @@ public class ItemStackMixin {
 
         Vec3 ref = pos.getCenter();
 
-        for (i = 0; i < 8; i++) {
+        for (i = 0; i < poslist.length; i++) {
             BlockPos rePos = pos.relative(axes[0], poslist[i][0]).relative(axes[1], poslist[i][1]);
             if (!player.level().getBlockState(rePos).canBeReplaced()) continue;
             BlockHitResult hit = new BlockHitResult(
