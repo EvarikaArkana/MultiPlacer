@@ -10,7 +10,7 @@ import static eva.replacer.config.RePlacerConfig.*;
 public class RePlacerConfigScreen implements ModMenuApi {
     public static ConfigBuilder builder() {
         ConfigBuilder builder = ConfigBuilder.create()
-                .setTitle(Component.literal("Simply Dual Wielding Config"))
+                .setTitle(Component.literal("RePlacer Config"))
                 .setSavingRunnable(JsonConfigHelper::writeToConfig)
                 .setEditable(true);
         RePlacerConfig INSTANCE = getInstance();
@@ -31,7 +31,7 @@ public class RePlacerConfigScreen implements ModMenuApi {
                     );
             builder.getOrCreateCategory(Component.literal("ReCorder"))
                     .addEntry(builder.entryBuilder()
-                            .startStrField(Component.literal("Build Name:"), buildName)
+                            .startStrField(Component.literal("Build Name:"), "")
                             .setTooltip(Component.literal("When you save a build,\nwhatever's in this field\nwill be its name."))
                             .setSaveConsumer(newName -> buildName = newName)
                             .build()
