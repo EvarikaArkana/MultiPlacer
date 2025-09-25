@@ -1,1 +1,3 @@
-introduced my template mod
+Config is working!
+
+Recorder in place.
