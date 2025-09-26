@@ -11,6 +11,7 @@ import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static eva.replacer.ItemStackAccess.findFirst;
 import static eva.replacer.config.RePlacerConfig.*;
 
 public class RePlacerClient implements ClientModInitializer {
@@ -37,6 +38,7 @@ public class RePlacerClient implements ClientModInitializer {
          ));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            if (ItemStackAccess.player[0] == null) ItemStackAccess.passPlayer(client.player);
             if (cycleBind.consumeClick()) {
                 assert client.player != null;
                 if (client.player.isShiftKeyDown()) {
@@ -46,6 +48,7 @@ public class RePlacerClient implements ClientModInitializer {
                     selection++;
                     if (selection >= buildNames().size()) selection = 0;
                 }
+                if (isRotate()) findFirst();
                 try {
                     client.player.displayClientMessage(Component.literal("swapped to " + buildNames().get(selection)), true);
                 } catch (NullPointerException ignored) {
@@ -53,6 +56,5 @@ public class RePlacerClient implements ClientModInitializer {
                 }
             }
         });
-
     }
 }

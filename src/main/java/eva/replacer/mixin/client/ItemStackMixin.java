@@ -2,9 +2,11 @@ package eva.replacer.mixin.client;
 
 
 import com.llamalad7.mixinextras.sugar.Local;
-import eva.replacer.config.RePlacerConfig;
+import eva.replacer.ItemStackAccess;
+import eva.replacer.RePlacerClient;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -18,13 +20,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Set;
+import java.util.List;
 
 import static eva.replacer.RePlacerClient.modifierBind;
 import static eva.replacer.config.RePlacerConfig.*;
 
 @Mixin(ItemStack.class)
-public class ItemStackMixin {
+public class ItemStackMixin implements ItemStackAccess {
 
     @Unique ItemStack itstck = (ItemStack) (Object) this;
     @Unique boolean rePlacing = false;
@@ -37,32 +39,33 @@ public class ItemStackMixin {
             )
     )
     private void placeAgain(UseOnContext context, CallbackInfoReturnable<InteractionResult> cir, @Local InteractionResult result) {
+        if (player[0] == null) ItemStackAccess.passPlayer(context.getPlayer());
+        if (!(result instanceof InteractionResult.Success) || rePlacing || !(itstck.getItem() instanceof BlockItem))
+            return;
+        if (reCording) {
+            buildSaver(context);
+            return;
+        }
+        if (!modifierBind.isDown()) return;
+        if (firstDir[0] == null) ItemStackAccess.findFirst();
+        BlockPos pos0 = context.getClickedPos();
+        Direction dir = context.getClickedFace();
+        Vec3 vec = context.getClickLocation();
+        pos0 = pos0.relative(dir.getAxis(), switch (dir.getAxisDirection()) {
+            case POSITIVE -> 1;
+            case NEGATIVE -> -1;
+        });
+        vec = vec.relative(dir, switch (dir.getAxisDirection()) {
+            case POSITIVE -> 1;
+            case NEGATIVE -> -1;
+        });
+        Player player = context.getPlayer();
+        assert player != null;
+        rePlacing = true;
+        RelPos.setBase(pos0);
         try {
-            if (!(result instanceof InteractionResult.Success) || rePlacing || !(itstck.getItem() instanceof BlockItem))
-                return;
-
-            if (reCording) {
-                buildSaver(context);
-                return;
-            }
-            if (!modifierBind.isDown()) return;
-            BlockPos pos0 = context.getClickedPos();
-            Direction dir = context.getClickedFace();
-            Vec3 vec = context.getClickLocation();
-            pos0 = pos0.relative(dir.getAxis(), switch (dir.getAxisDirection()) {
-                case POSITIVE -> 1;
-                case NEGATIVE -> -1;
-            });
-            vec = vec.relative(dir, switch (dir.getAxisDirection()) {
-                case POSITIVE -> 1;
-                case NEGATIVE -> -1;
-            });
-            Player player = context.getPlayer();
-            assert player != null;
-            rePlacing = true;
-            RelPos.setBase(vec, pos0);
-            Set<RelPos> poss = getBuilds().get(names.get(selection));
-            poss.forEach(pos -> {
+            if (isRotate()) RelPos.setDirShift(dir, firstDir[0]);
+            getBuild().forEach(pos -> {
                 if (player.level().getBlockState(pos.pos()).canBeReplaced()) {
                     BlockHitResult check = new BlockHitResult(
                             pos.vec(),
@@ -75,11 +78,12 @@ public class ItemStackMixin {
                 }
             });
 
-
             rePlacing = false;
-        } catch (Exception ignored) {
 
+        } catch (Exception ignored) {
+            RePlacerClient.LOGGER.info("Failed to get build!");
+            player.displayClientMessage(Component.literal("Failed to get build!"), false);
+            player.displayClientMessage(Component.literal(" "), false);
         }
     }
-
 }
