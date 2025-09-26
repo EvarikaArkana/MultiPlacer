@@ -44,11 +44,11 @@ public class RePlacerConfigScreen implements ModMenuApi {
                     );
             builder.getOrCreateCategory(Component.literal("Build Management"))
                     .addEntry(builder.entryBuilder()
-                            .startStrList(Component.literal("Build Names:"), buildNames())
+                            .startStrList(Component.literal("Build Names:"), getNames())
                             .setDeleteButtonEnabled(true)
                             .setRemoveButtonTooltip(Component.literal("Deleting this will delete the build!"))
                             .setExpanded(true)
-                            .setSaveConsumer(RePlacerConfig::saveBuilds)
+                            .setSaveConsumer(RePlacerConfig::buildDeleter)
                             .build()
                     );
         }

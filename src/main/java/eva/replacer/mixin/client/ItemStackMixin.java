@@ -1,9 +1,9 @@
 package eva.replacer.mixin.client;
 
 
-import com.llamalad7.mixinextras.sugar.Local;
 import eva.replacer.ItemStackAccess;
 import eva.replacer.RePlacerClient;
+import eva.replacer.config.RelPos;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -14,17 +14,17 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import org.spongepowered.asm.mixin.Debug;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.List;
-
 import static eva.replacer.RePlacerClient.modifierBind;
 import static eva.replacer.config.RePlacerConfig.*;
 
+@Debug(export = true)
 @Mixin(ItemStack.class)
 public class ItemStackMixin implements ItemStackAccess {
 
@@ -34,28 +34,22 @@ public class ItemStackMixin implements ItemStackAccess {
     @Inject(
             method = "useOn",
             at = @At(
-                    value = "RETURN",
-                    ordinal = 1
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/world/entity/player/Player;awardStat(Lnet/minecraft/stats/Stat;)V"
             )
     )
-    private void placeAgain(UseOnContext context, CallbackInfoReturnable<InteractionResult> cir, @Local InteractionResult result) {
+    private void placeAgain(UseOnContext context, CallbackInfoReturnable<InteractionResult> cir) {
         if (player[0] == null) ItemStackAccess.passPlayer(context.getPlayer());
-        if (!(result instanceof InteractionResult.Success) || rePlacing || !(itstck.getItem() instanceof BlockItem))
+        if (rePlacing || !(itstck.getItem() instanceof BlockItem))
             return;
         if (reCording) {
             buildSaver(context);
             return;
         }
         if (!modifierBind.isDown()) return;
-        if (firstDir[0] == null) ItemStackAccess.findFirst();
         BlockPos pos0 = context.getClickedPos();
         Direction dir = context.getClickedFace();
-        Vec3 vec = context.getClickLocation();
         pos0 = pos0.relative(dir.getAxis(), switch (dir.getAxisDirection()) {
-            case POSITIVE -> 1;
-            case NEGATIVE -> -1;
-        });
-        vec = vec.relative(dir, switch (dir.getAxisDirection()) {
             case POSITIVE -> 1;
             case NEGATIVE -> -1;
         });
@@ -63,9 +57,9 @@ public class ItemStackMixin implements ItemStackAccess {
         assert player != null;
         rePlacing = true;
         RelPos.setBase(pos0);
+        if (isRotate()) RelPos.setDirShift(dir, getBuild()[0].dir());
         try {
-            if (isRotate()) RelPos.setDirShift(dir, firstDir[0]);
-            getBuild().forEach(pos -> {
+            for (RelPos pos : getBuild()) {
                 if (player.level().getBlockState(pos.pos()).canBeReplaced()) {
                     BlockHitResult check = new BlockHitResult(
                             pos.vec(),
@@ -76,14 +70,11 @@ public class ItemStackMixin implements ItemStackAccess {
                     UseOnContext reContext = new UseOnContext(player, context.getHand(), check);
                     itstck.useOn(reContext);
                 }
-            });
-
-            rePlacing = false;
-
+            }
         } catch (Exception ignored) {
             RePlacerClient.LOGGER.info("Failed to get build!");
-            player.displayClientMessage(Component.literal("Failed to get build!"), false);
-            player.displayClientMessage(Component.literal(" "), false);
+            player.displayClientMessage(Component.literal("Failed to get build! 1"), false);
         }
+        rePlacing = false;
     }
 }

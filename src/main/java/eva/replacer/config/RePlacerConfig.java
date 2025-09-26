@@ -4,22 +4,22 @@ import eva.replacer.RePlacerClient;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+
+import static eva.replacer.config.JsonConfigHelper.*;
 
 public class RePlacerConfig {
-
+    static int ver = 0;
+    private int v = ver;
     private boolean rotate = true;
-    private Hashtable<String, List<RelPos>> builds = new Hashtable<>();
+    private List<String> names =  new ArrayList<>();
 
-    public static List<String> names =  new ArrayList<>();
     public static int selection = 0;
     public static boolean reCording = false;
     static String buildName;
-    private static Set<RelPos> build;
+    private static List<RelPos> tempBuild;
     private static RePlacerConfig INSTANCE;
 
     public static RePlacerConfig getInstance() {
@@ -29,11 +29,10 @@ public class RePlacerConfig {
         return INSTANCE;
     }
 
-    public void updateConfigs(RePlacerConfig config) {
+    void updateConfigs(RePlacerConfig config) {
+        this.v = config.v;
         this.rotate = config.rotate;
-        this.builds = new Hashtable<>();
-        this.builds.putAll(config.builds);
-        names = buildNames();
+        this.names = config.names;
     }
 
     public static boolean isRotate() {
@@ -44,109 +43,58 @@ public class RePlacerConfig {
         getInstance().rotate = rotate;
     }
 
-    @NotNull
-    public static List<RelPos> getBuild() {
-        return getInstance().builds.get(names.get(selection));
-    }
+    public static List<String> getNames() {return getInstance().names;}
 
-    public static Hashtable<String, List<RelPos>> getBuilds() {return getInstance().builds;}
+    static void setNames(List<String> names) {getInstance().names = names;}
+
+    @NotNull
+    public static RelPos[] getBuild() {
+        return readBuild(getInstance().names.get(selection));
+    }
 
     public static void saveBuild(boolean confirm) {
         if (confirm) {
-            getInstance().builds.put(buildName, new ArrayList<>(build));
+            writeBuild(buildName, tempBuild.toArray(new RelPos[0]));
             RePlacerClient.LOGGER.info("Saved {}!", buildName);
-            names.add(buildName);
+            getInstance().names.add(buildName);
         }
         buildName = null;
-        build = null;
+        tempBuild = null;
         reCording = false;
         RePlacerClient.LOGGER.info("Purged temp vars");
     }
 
-    static void saveBuilds(List<String> list) {
-        final List<String> names2 = list;
-        Hashtable<String, List<RelPos>> buildict = new Hashtable<>();
+    static void buildDeleter(List<String> list) {
         list.forEach(name -> {
-             try {
-                 buildict.put(name, getInstance().builds.get(name));
-             } catch (NullPointerException ignored) {
-                 names2.remove(name);
+             if (!getInstance().names.contains(name)) {
+                 list.remove(name);
              }
         });
-        RePlacerConfig.names = names2;
-        getInstance().builds = buildict;
-    }
-
-    public static List<String> buildNames() {
-        List<String> buildNames = new ArrayList<>();
-        Enumeration<String> it = getInstance().builds.keys();
-        while (it.hasMoreElements())
-            buildNames.add(it.nextElement());
-        names = buildNames;
-        return names;
-    }
-
-    public static class RelPos {
-        private final Direction dir;
-        private final int[] pos = new int[3];
-        private static int[] basePos;
-        private static Direction[] shiftDir;
-        private static Hashtable<Direction, Direction> shiftImpl;
-
-        public static void setBase(BlockPos p) {
-            basePos = new int[]{p.getX(), p.getY(), p.getZ()};
-        }
-        public static void setDirShift(Direction baseDir, Direction firstDir) {
-            shiftDir = new Direction[]{baseDir, firstDir};
-            shiftImpl = new Hashtable<>();
-            shiftImpl.put(baseDir, firstDir);
-            if (baseDir == firstDir) return;
-            if (baseDir == firstDir.getOpposite()) {
-                shiftImpl.put(firstDir, baseDir);
-                return;
+        getInstance().names.forEach(name -> {
+            if (!list.contains(name)) {
+                deleteBuild(name);
             }
-            shiftImpl.put(firstDir, baseDir.getOpposite());
-            shiftImpl.put(baseDir.getOpposite(), firstDir.getOpposite());
-            shiftImpl.put(firstDir.getOpposite(), baseDir);
-        }
-
-        public RelPos(Direction dir, BlockPos pos) {
-            this.dir = dir;
-            this.pos[0] = pos.getX() - basePos[0];
-            this.pos[1] = pos.getY() - basePos[1];
-            this.pos[2] = pos.getZ() - basePos[2];
-        }
-
-        public Vec3 vec() {
-            return pos().getCenter();
-        }
-        public Direction dir() {
-            if (!isRotate()) return this.dir;
-            if (shiftDir[0] == shiftDir[1]) return this.dir;
-            if (!(this.dir.getAxis() == shiftDir[0].getAxis() || this.dir.getAxis() == shiftDir[1].getAxis())) return this.dir;
-            return shiftImpl.get(this.dir);
-        }
-        public BlockPos pos() {
-            int[] temp = new int[3];
-            if (isRotate()) {
-                for (int i = 0; i < 3; i++) {
-                    if (!(this.dir.getAxis() == shiftDir[0].getAxis() || this.dir.getAxis() == shiftDir[1].getAxis())) temp[i] = this.pos[i];
-                    if (shiftDir[0].getAxis() == shiftDir[1].getAxis())
-                        temp[i] = this.pos[0] * (shiftDir[0].getAxisDirection() == shiftDir[1].getAxisDirection() ? 1 : -1);
-                    else temp[i] = this.pos[shiftImpl.get(this.dir).getAxis().ordinal()] *  (shiftImpl.get(this.dir).getAxisDirection() == shiftDir[1].getAxisDirection() ? 1 : -1);
-                }
-            } else {temp = this.pos.clone();}
-            return new BlockPos(temp[0] + basePos[0], temp[1] + basePos[1], temp[2] + basePos[2]);
-        }
+        });
+        getInstance().names = list;
+        selection = 0;
     }
 
     public static void buildSaver(UseOnContext context) {
         BlockPos pos = context.getClickedPos();
         Direction dir = context.getClickedFace();
-        if (build == null) {
-            build = ConcurrentHashMap.newKeySet();
+        pos = pos.relative(dir.getAxis(), switch (dir.getAxisDirection()) {
+            case POSITIVE -> 1;
+            case NEGATIVE -> -1;
+        });
+        if (tempBuild == null) {
+            tempBuild = new ArrayList<>();
             RelPos.setBase(pos);
         }
-        build.add(new RelPos(dir, pos));
+        RelPos rel = new RelPos(dir, pos);
+        final boolean[] containerCheck = {true};
+        tempBuild.forEach(r -> {
+            if (r.equals(rel)) containerCheck[0] = false;
+        });
+        if (containerCheck[0]) tempBuild.add(rel);
     }
 }

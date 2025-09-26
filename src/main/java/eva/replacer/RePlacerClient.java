@@ -43,16 +43,16 @@ public class RePlacerClient implements ClientModInitializer {
                 assert client.player != null;
                 if (client.player.isShiftKeyDown()) {
                     selection--;
-                    if (selection < 0) selection = buildNames().size() - 1;
+                    if (selection < 0) selection = getNames().size() - 1;
                 } else {
                     selection++;
-                    if (selection >= buildNames().size()) selection = 0;
+                    if (selection >= getNames().size()) selection = 0;
                 }
                 if (isRotate()) findFirst();
                 try {
-                    client.player.displayClientMessage(Component.literal("swapped to " + buildNames().get(selection)), true);
-                } catch (NullPointerException ignored) {
-
+                    client.player.displayClientMessage(Component.literal("swapped to " + getNames().get(selection)), true);
+                } catch (Exception ignored) {
+                    client.player.displayClientMessage(Component.literal("No builds registered!"), true);
                 }
             }
         });
