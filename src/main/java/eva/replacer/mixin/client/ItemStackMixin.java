@@ -13,7 +13,6 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Debug;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -49,30 +48,38 @@ public class ItemStackMixin implements ItemStackAccess {
         if (!modifierBind.isDown()) return;
         BlockPos pos0 = context.getClickedPos();
         Direction dir = context.getClickedFace();
-        pos0 = pos0.relative(dir.getAxis(), switch (dir.getAxisDirection()) {
-            case POSITIVE -> 1;
-            case NEGATIVE -> -1;
-        });
         Player player = context.getPlayer();
         assert player != null;
+        if (!player.level().getBlockState(pos0).canBeReplaced())
+            pos0 = pos0.relative(dir, 1);
         rePlacing = true;
         RelPos.setBase(pos0);
         if (isRotate()) RelPos.setDirShift(dir, getBuild()[0].dir());
         try {
-            for (RelPos pos : getBuild()) {
-                if (player.level().getBlockState(pos.pos()).canBeReplaced()) {
-                    BlockHitResult check = new BlockHitResult(
+            RelPos[] iterate = getBuild();
+            boolean first = true;
+            for (RelPos pos : iterate) {
+                if (first) {
+                    first = false;
+                    continue;
+                }
+                if (player.level().getBlockState(pos.pos().relative(pos.dir())).canBeReplaced()) {
+                    itstck.useOn(
+                            new UseOnContext(
+                                    player,
+                                    context.getHand(),
+                                    new BlockHitResult(
                             pos.vec(),
                             pos.dir(),
-                            pos.pos(),
-                            false
+                            pos.pos().relative(pos.dir(), -1),
+                            context.isInside()
+                                    )
+                            )
                     );
-                    UseOnContext reContext = new UseOnContext(player, context.getHand(), check);
-                    itstck.useOn(reContext);
                 }
             }
         } catch (Exception ignored) {
-            RePlacerClient.LOGGER.info("Failed to get build!");
+            RePlacerClient.LOGGER.info("Failed to get build! 1");
             player.displayClientMessage(Component.literal("Failed to get build! 1"), false);
         }
         rePlacing = false;

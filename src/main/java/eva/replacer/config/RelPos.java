@@ -10,13 +10,11 @@ import java.util.Hashtable;
 public class RelPos {
     private final Direction dir;
     private final int[] pos = new int[3];
-    private static int[] basePos;
+    private static BlockPos basePos;
     private static Direction[] shiftDir;
     private static Hashtable<Direction, Direction> shiftImpl;
 
-    public static void setBase(BlockPos p) {
-        basePos = new int[]{p.getX(), p.getY(), p.getZ()};
-    }
+    public static void setBase(BlockPos p) {basePos = p;}
 
     public static void setDirShift(@NotNull Direction baseDir, @NotNull Direction firstDir) {
         shiftDir = new Direction[]{baseDir, firstDir};
@@ -34,9 +32,9 @@ public class RelPos {
 
     public RelPos(Direction dir, BlockPos pos) {
         this.dir = dir;
-        this.pos[0] = pos.getX() - basePos[0];
-        this.pos[1] = pos.getY() - basePos[1];
-        this.pos[2] = pos.getZ() - basePos[2];
+        this.pos[0] = pos.getX() - basePos.getX();
+        this.pos[1] = pos.getY() - basePos.getY();
+        this.pos[2] = pos.getZ() - basePos.getZ();
     }
 
     public Vec3 vec() {
@@ -52,8 +50,9 @@ public class RelPos {
     }
 
     public BlockPos pos() {
-        int[] temp = new int[3];
-        if (RePlacerConfig.isRotate()) {
+//        if ((RePlacerConfig.isRotate() || shiftDir[0] == shiftDir[1]) && shiftDir != null) {
+        if (false) {
+            int[] temp = new int[3];
             for (int i = 0; i < 3; i++) {
                 if (!(this.dir.getAxis() == shiftDir[0].getAxis() || this.dir.getAxis() == shiftDir[1].getAxis()))
                     temp[i] = this.pos[i];
@@ -62,10 +61,16 @@ public class RelPos {
                 else
                     temp[i] = this.pos[shiftImpl.get(this.dir).getAxis().ordinal()] * (shiftImpl.get(this.dir).getAxisDirection() == shiftDir[1].getAxisDirection() ? 1 : -1);
             }
+            return basePos
+                    .relative(Direction.Axis.X, temp[0])
+                    .relative(Direction.Axis.Y, temp[1])
+                    .relative(Direction.Axis.Z, temp[2]);
         } else {
-            temp = this.pos.clone();
+            return basePos
+                    .relative(Direction.Axis.X, this.pos[0])
+                    .relative(Direction.Axis.Y, this.pos[1])
+                    .relative(Direction.Axis.Z, this.pos[2]);
         }
-        return new BlockPos(temp[0] + basePos[0], temp[1] + basePos[1], temp[2] + basePos[2]);
     }
 
     public boolean equals(RelPos tester) {

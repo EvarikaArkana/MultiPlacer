@@ -53,10 +53,14 @@ public class RePlacerConfig {
     }
 
     public static void saveBuild(boolean confirm) {
-        if (confirm) {
-            writeBuild(buildName, tempBuild.toArray(new RelPos[0]));
-            RePlacerClient.LOGGER.info("Saved {}!", buildName);
-            getInstance().names.add(buildName);
+        try {
+            if (confirm) {
+                writeBuild(buildName, tempBuild.toArray(new RelPos[0]));
+                RePlacerClient.LOGGER.info("Saved {}!", buildName);
+                getInstance().names.add(buildName);
+            }
+        }catch (NullPointerException e) {
+            RePlacerClient.LOGGER.warn("Could not save build! Build was likely empty!");
         }
         buildName = null;
         tempBuild = null;
@@ -82,10 +86,7 @@ public class RePlacerConfig {
     public static void buildSaver(UseOnContext context) {
         BlockPos pos = context.getClickedPos();
         Direction dir = context.getClickedFace();
-        pos = pos.relative(dir.getAxis(), switch (dir.getAxisDirection()) {
-            case POSITIVE -> 1;
-            case NEGATIVE -> -1;
-        });
+        pos = pos.relative(dir, 1);
         if (tempBuild == null) {
             tempBuild = new ArrayList<>();
             RelPos.setBase(pos);
