@@ -13,6 +13,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
+import static eva.replacer.util.BuildHolder.buildDefault;
+
 public class JsonConfigHelper {
     private static final File folder = new File("config");
     private static final File buildFolder = new File(folder,"RePlacer Builds");
@@ -53,6 +55,8 @@ public class JsonConfigHelper {
                     FileWriter writer = new FileWriter(rePlacerConfig);
                     writer.write(json);
                     writer.close();
+                    RePlacerClient.LOGGER.info("Writing default build at './config/RePlacerBuilds/square.json'.");
+                    writeSquare();
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -118,10 +122,6 @@ public class JsonConfigHelper {
         }
     }
 
-    static boolean checkBuild(String name) {
-        return builds.containsKey(name);
-    }
-
     static void deleteBuild(String name) {
         builds.get(name).delete();
     }
@@ -132,6 +132,17 @@ public class JsonConfigHelper {
             String json = configGson.toJson(new BuildHolder(dir, build));
             FileWriter writer = new FileWriter(builds.get(name), false);
             writer.write(json);
+            writer.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    static void writeSquare() {
+        try {
+            builds.put("square", new File(buildFolder, "square.json"));
+            FileWriter writer = new FileWriter(builds.get("square"), false);
+            writer.write(buildDefault());
             writer.close();
         } catch (IOException e) {
             throw new RuntimeException(e);

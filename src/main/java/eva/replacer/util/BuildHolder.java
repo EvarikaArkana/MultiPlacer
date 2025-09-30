@@ -36,4 +36,75 @@ public record BuildHolder(Direction firstDir, RelPos[] posList) {
         }
         return new BuildHolder(baseDir, posList);
     }
+
+    public static String buildDefault() {
+        return "{\n" +
+                "  \"firstDir\": \"UP\",\n" +
+                "  \"posList\": [\n" +
+                "    {\n" +
+                "      \"pos\": [\n" +
+                "        0,\n" +
+                "        0,\n" +
+                "        0\n" +
+                "      ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"pos\": [\n" +
+                "        1,\n" +
+                "        0,\n" +
+                "        0\n" +
+                "      ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"pos\": [\n" +
+                "        -1,\n" +
+                "        0,\n" +
+                "        0\n" +
+                "      ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"pos\": [\n" +
+                "        0,\n" +
+                "        0,\n" +
+                "        1\n" +
+                "      ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"pos\": [\n" +
+                "        -1,\n" +
+                "        0,\n" +
+                "        1\n" +
+                "      ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"pos\": [\n" +
+                "        1,\n" +
+                "        0,\n" +
+                "        1\n" +
+                "      ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"pos\": [\n" +
+                "        1,\n" +
+                "        0,\n" +
+                "        -1\n" +
+                "      ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"pos\": [\n" +
+                "        0,\n" +
+                "        0,\n" +
+                "        -1\n" +
+                "      ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"pos\": [\n" +
+                "        -1,\n" +
+                "        0,\n" +
+                "        -1\n" +
+                "      ]\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+    }
 }
