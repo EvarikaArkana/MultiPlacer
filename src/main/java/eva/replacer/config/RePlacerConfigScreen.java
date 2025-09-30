@@ -5,6 +5,8 @@ import com.terraformersmc.modmenu.api.ModMenuApi;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import net.minecraft.network.chat.Component;
 
+import java.util.ArrayList;
+
 import static eva.replacer.config.RePlacerConfig.*;
 
 public class RePlacerConfigScreen implements ModMenuApi {
@@ -16,17 +18,22 @@ public class RePlacerConfigScreen implements ModMenuApi {
         RePlacerConfig INSTANCE = getInstance();
         if (reCording)
             builder.getOrCreateCategory(Component.literal("Confirm build save?"))
-                            .addEntry(builder.entryBuilder()
-                                    .startBooleanToggle(Component.literal("Are you sure you want to save " + buildName + " as a build?"), false)
-                                    .setSaveConsumer(RePlacerConfig::saveBuild)
-                                    .build()
-                            );
+                    .addEntry(builder.entryBuilder()
+                            .startBooleanToggle(Component.literal("Are you sure you want to save \n\"" + buildName + "\"\n as a build?"), false)
+                            .setSaveConsumer(RePlacerConfig::saveBuild)
+                            .build()
+                    )
+                    .addEntry(builder.entryBuilder()
+                            .startBooleanToggle(Component.literal("Confirm exit? (required to exit if discarding the build)"), false)
+                            .build()
+                    );
         else {
             builder.getOrCreateCategory(Component.literal("Options"))
                     .addEntry(builder.entryBuilder()
                             .startBooleanToggle(Component.literal("Rotate builds:"), isRotate())
                             .setTooltip(Component.literal("Rotate builds along all three axes"))
                             .setSaveConsumer(RePlacerConfig::setRotate)
+                            .setDefaultValue(true)
                             .build()
                     );
             builder.getOrCreateCategory(Component.literal("ReCorder"))
@@ -44,11 +51,12 @@ public class RePlacerConfigScreen implements ModMenuApi {
                     );
             builder.getOrCreateCategory(Component.literal("Build Management"))
                     .addEntry(builder.entryBuilder()
-                            .startStrList(Component.literal("Build Names:"), buildNames())
+                            .startStrList(Component.literal("Build Names:"), getNames())
                             .setDeleteButtonEnabled(true)
                             .setRemoveButtonTooltip(Component.literal("Deleting this will delete the build!"))
                             .setExpanded(true)
-                            .setSaveConsumer(RePlacerConfig::saveBuilds)
+                            .setSaveConsumer(RePlacerConfig::buildDeleter)
+                            .setDefaultValue(new ArrayList<>())
                             .build()
                     );
         }

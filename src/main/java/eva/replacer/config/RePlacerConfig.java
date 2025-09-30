@@ -1,25 +1,29 @@
 package eva.replacer.config;
 
+import eva.replacer.RePlacerClient;
+import eva.replacer.util.BuildHolder;
+import eva.replacer.util.RelPos;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
+import static eva.replacer.config.JsonConfigHelper.*;
+
 public class RePlacerConfig {
-
+    static int ver = 0;
+    private int v = ver;
     private boolean rotate = true;
+    private List<String> names =  new ArrayList<>();
 
-    private Hashtable<String, Set<RelPos>> builds = new Hashtable<>();
-
-    public static List<String> names =  new ArrayList<>();
     public static int selection = 0;
     public static boolean reCording = false;
-    public static boolean reFirst = true;
-    public static String buildName;
-    public static List<RelPos> build;
+    static String buildName;
+    private static List<RelPos> tempBuild;
     private static RePlacerConfig INSTANCE;
+    private static Direction dir;
 
     public static RePlacerConfig getInstance() {
         if (INSTANCE == null) {
@@ -28,10 +32,10 @@ public class RePlacerConfig {
         return INSTANCE;
     }
 
-    public void updateConfigs(RePlacerConfig config) {
+    void updateConfigs(RePlacerConfig config) {
+        this.v = config.v;
         this.rotate = config.rotate;
-        this.builds = config.builds;
-        names = buildNames();
+        this.names = config.names;
     }
 
     public static boolean isRotate() {
@@ -42,80 +46,59 @@ public class RePlacerConfig {
         getInstance().rotate = rotate;
     }
 
-    public static Hashtable<String, Set<RelPos>> getBuilds() {return getInstance().builds;}
+    public static List<String> getNames() {return getInstance().names;}
+
+    static void setNames(List<String> names) {getInstance().names = names;}
+
+    @NotNull
+    public static BuildHolder getBuild() {
+        return readBuild(getInstance().names.get(selection));
+    }
 
     public static void saveBuild(boolean confirm) {
-        getInstance().builds.put(buildName, new HashSet<>(build));
+        try {
+            if (confirm) {
+                writeBuild(buildName, dir, tempBuild.toArray(new RelPos[0]));
+                RePlacerClient.LOGGER.info("Saved {}!", buildName);
+                getInstance().names.add(buildName);
+            }
+        }catch (NullPointerException e) {
+            RePlacerClient.LOGGER.warn("Could not save build! Build was likely empty!");
+        }
         buildName = null;
-        build = null;
-        reFirst = true;
+        tempBuild = null;
         reCording = false;
+        dir = null;
+        RePlacerClient.LOGGER.info("Purged temp vars");
     }
 
-    static void saveBuilds(List<String> list) {
-        final List<String> names2 = list;
-        Hashtable<String, Set<RelPos>> buildict = new Hashtable<>();
+    static void buildDeleter(List<String> list) {
         list.forEach(name -> {
-             try {
-                 buildict.put(name, getInstance().builds.get(name));
-             } catch (NullPointerException ignored) {
-                 names2.remove(name);
+             if (!getInstance().names.contains(name)) {
+                 list.remove(name);
              }
         });
-        RePlacerConfig.names = names2;
-        getInstance().builds = buildict;
+        getInstance().names.forEach(name -> {
+            if (!list.contains(name)) {
+                deleteBuild(name);
+            }
+        });
+        getInstance().names = list;
+        selection = 0;
     }
 
-    public static List<String> buildNames() {
-        List<String> buildNames = new ArrayList<>();
-        Enumeration<String> it = getInstance().builds.keys();
-        while (it.hasMoreElements())
-            buildNames.add(it.nextElement());
-        names = buildNames;
-        return names;
-    }
-
-    public static class RelPos {
-        private final double[] vec = new double[3];
-        private final Direction dir;
-        private final int[] pos = new int[3];
-        private static double[] baseVec;
-        private static int[] basePos;
-
-        public static void setBase(Vec3 v, BlockPos p) {
-            baseVec = new double[]{v.x, v.y, v.z};
-            basePos = new int[]{p.getX(), p.getY(), p.getZ()};
-        }
-        public RelPos(Vec3 vec, Direction dir, BlockPos pos) {
-            this.vec[0] = vec.x - baseVec[0];
-            this.vec[1] = vec.y - baseVec[1];
-            this.vec[2] = vec.z - baseVec[2];
-            this.dir = dir;
-            this.pos[0] = pos.getX() - basePos[0];
-            this.pos[1] = pos.getY() - basePos[1];
-            this.pos[2] = pos.getZ() - basePos[2];
-        }
-
-        public Vec3 vec() {
-            return new Vec3(this.vec[0] + baseVec[0], this.vec[1] + baseVec[1], this.vec[2] + baseVec[2]);
-        }
-        public Direction dir() {return dir;}
-        public BlockPos pos() {
-            return new BlockPos(this.pos[0] + basePos[0], this.pos[1] + basePos[1], this.pos[2] + basePos[2]);
-        }
-    }
-
-    public static void buildSaver(UseOnContext context) {
-        if (reFirst) {
-            build = new ArrayList<>();
-        }
+    public static void buildSaver(BlockPlaceContext context) {
         BlockPos pos = context.getClickedPos();
-        Direction dir = context.getClickedFace();
-        Vec3 vec = context.getClickLocation();
-        if (reFirst) {
-            RelPos.setBase(vec, pos);
-            reFirst = false;
+        if (tempBuild == null) {
+            dir = context.getClickedFace();
+            tempBuild = new ArrayList<>();
+            RelPos.setBase(pos);
         }
-        build.add(new RelPos(vec, dir, pos));
+        RelPos rel = new RelPos(pos);
+        final boolean[] containerCheck = {true};
+        tempBuild.forEach(r -> {
+            if (r.equals(rel)) containerCheck[0] = false;
+        });
+        if (containerCheck[0]) tempBuild.add(rel);
     }
 }
