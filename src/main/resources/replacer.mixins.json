@@ -5,7 +5,7 @@
   "mixins": [
   ],
   "client": [
-    "client.ItemStackMixin"
+    "client.BlockItemMixin"
   ],
   "injectors": {
     "defaultRequire": 1

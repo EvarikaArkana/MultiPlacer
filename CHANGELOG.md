@@ -1,3 +1,3 @@
-Config is working!
+Full rotation implementation!
 
-Recorder in place.
+Reworked keybinds.

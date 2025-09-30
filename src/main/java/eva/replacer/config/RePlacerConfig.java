@@ -1,9 +1,11 @@
 package eva.replacer.config;
 
 import eva.replacer.RePlacerClient;
+import eva.replacer.util.BuildHolder;
+import eva.replacer.util.RelPos;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -21,6 +23,7 @@ public class RePlacerConfig {
     static String buildName;
     private static List<RelPos> tempBuild;
     private static RePlacerConfig INSTANCE;
+    private static Direction dir;
 
     public static RePlacerConfig getInstance() {
         if (INSTANCE == null) {
@@ -48,14 +51,14 @@ public class RePlacerConfig {
     static void setNames(List<String> names) {getInstance().names = names;}
 
     @NotNull
-    public static RelPos[] getBuild() {
+    public static BuildHolder getBuild() {
         return readBuild(getInstance().names.get(selection));
     }
 
     public static void saveBuild(boolean confirm) {
         try {
             if (confirm) {
-                writeBuild(buildName, tempBuild.toArray(new RelPos[0]));
+                writeBuild(buildName, dir, tempBuild.toArray(new RelPos[0]));
                 RePlacerClient.LOGGER.info("Saved {}!", buildName);
                 getInstance().names.add(buildName);
             }
@@ -65,6 +68,7 @@ public class RePlacerConfig {
         buildName = null;
         tempBuild = null;
         reCording = false;
+        dir = null;
         RePlacerClient.LOGGER.info("Purged temp vars");
     }
 
@@ -83,15 +87,14 @@ public class RePlacerConfig {
         selection = 0;
     }
 
-    public static void buildSaver(UseOnContext context) {
+    public static void buildSaver(BlockPlaceContext context) {
         BlockPos pos = context.getClickedPos();
-        Direction dir = context.getClickedFace();
-        pos = pos.relative(dir, 1);
         if (tempBuild == null) {
+            dir = context.getClickedFace();
             tempBuild = new ArrayList<>();
             RelPos.setBase(pos);
         }
-        RelPos rel = new RelPos(dir, pos);
+        RelPos rel = new RelPos(pos);
         final boolean[] containerCheck = {true};
         tempBuild.forEach(r -> {
             if (r.equals(rel)) containerCheck[0] = false;

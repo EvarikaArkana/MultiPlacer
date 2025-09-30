@@ -3,6 +3,9 @@ package eva.replacer.config;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import eva.replacer.RePlacerClient;
+import eva.replacer.util.BuildHolder;
+import eva.replacer.util.RelPos;
+import net.minecraft.core.Direction;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
@@ -123,10 +126,10 @@ public class JsonConfigHelper {
         builds.get(name).delete();
     }
 
-    static void writeBuild(String name, RelPos[] build) {
+    static void writeBuild(String name, Direction dir, RelPos[] build) {
         try {
             builds.put(name, new File(buildFolder, name + ".json"));
-            String json = configGson.toJson(new BuildHolder(build));
+            String json = configGson.toJson(new BuildHolder(dir, build));
             FileWriter writer = new FileWriter(builds.get(name), false);
             writer.write(json);
             writer.close();
@@ -136,10 +139,9 @@ public class JsonConfigHelper {
     }
 
     @NotNull
-    static RelPos[] readBuild(String name) {
+    static BuildHolder readBuild(String name) {
         try {
-            BuildHolder holder = configGson.fromJson(new FileReader(builds.get(name)), BuildHolder.class);
-            return holder.posList();
+            return configGson.fromJson(new FileReader(builds.get(name)), BuildHolder.class);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }

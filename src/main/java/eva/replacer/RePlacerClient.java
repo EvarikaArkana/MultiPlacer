@@ -11,7 +11,6 @@ import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static eva.replacer.ItemStackAccess.findFirst;
 import static eva.replacer.config.RePlacerConfig.*;
 
 public class RePlacerClient implements ClientModInitializer {
@@ -19,6 +18,8 @@ public class RePlacerClient implements ClientModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     public static KeyMapping modifierBind;
     public static KeyMapping cycleBind;
+    public static KeyMapping modifierToggle;
+    private static boolean toggled = false;
     @Override
     public void onInitializeClient() {
 
@@ -36,9 +37,14 @@ public class RePlacerClient implements ClientModInitializer {
                  GLFW.GLFW_KEY_Z,
                  "RePlacer"
          ));
+         modifierToggle = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+                 "RePlacer Modifier Toggle Key",
+                 InputConstants.Type.KEYSYM,
+                 GLFW.GLFW_KEY_UNKNOWN,
+                 "RePlacer"
+         ));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (ItemStackAccess.player[0] == null) ItemStackAccess.passPlayer(client.player);
             if (cycleBind.consumeClick()) {
                 assert client.player != null;
                 if (client.player.isShiftKeyDown()) {
@@ -48,13 +54,19 @@ public class RePlacerClient implements ClientModInitializer {
                     selection++;
                     if (selection >= getNames().size()) selection = 0;
                 }
-                if (isRotate()) findFirst();
                 try {
                     client.player.displayClientMessage(Component.literal("swapped to " + getNames().get(selection)), true);
                 } catch (Exception ignored) {
                     client.player.displayClientMessage(Component.literal("No builds registered!"), true);
                 }
             }
+                if  (modifierToggle.consumeClick()) {
+                    toggled = !toggled;
+                }
         });
+    }
+
+    public static boolean isHeldOrToggled() {
+        return toggled || modifierBind.isDown();
     }
 }
