@@ -45,7 +45,7 @@ public class BlockItemMixin {
         assert player != null;
         rePlacing = true;
         RelPos.setBase(pos0);
-//        try {
+        try {
             setBaseDir(context.getClickedFace());
             BuildHolder build = rotate(getBuild());
             for (RelPos pos : build.posList()) {
@@ -68,10 +68,10 @@ public class BlockItemMixin {
                     player.awardStat(Stats.ITEM_USED.get(blit));
                 }
             }
-//        } catch (Exception ignored) {
-//            RePlacerClient.LOGGER.info("Failed to get build! 1");
-//            player.displayClientMessage(Component.literal("Failed to get build! 1"), false);
-//        }
+        } catch (Exception ignored) {
+            RePlacerClient.LOGGER.info("Failed to get build!");
+            player.displayClientMessage(Component.literal("Failed to get build!"), false);
+        }
         setBaseDir(null);
         rePlacing = false;
     }
