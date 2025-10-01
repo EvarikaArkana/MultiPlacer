@@ -19,12 +19,12 @@ public class RePlacerConfigScreen implements ModMenuApi {
         if (reCording)
             builder.getOrCreateCategory(Component.literal("Confirm build save?"))
                     .addEntry(builder.entryBuilder()
-                            .startBooleanToggle(Component.literal("Are you sure you want to save \n\"" + buildName + "\"\n as a build?"), false)
+                            .startBooleanToggle(Component.literal("Save " + buildName + "?"), false)
                             .setSaveConsumer(RePlacerConfig::saveBuild)
                             .build()
                     )
                     .addEntry(builder.entryBuilder()
-                            .startBooleanToggle(Component.literal("Confirm exit? (required to exit if discarding the build)"), false)
+                            .startBooleanToggle(Component.literal("Click this to allow discarding current build"), false)
                             .build()
                     );
         else {

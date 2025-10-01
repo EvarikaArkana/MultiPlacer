@@ -87,12 +87,14 @@ public class RePlacerConfig {
         selection = 0;
     }
 
-    public static void buildSaver(BlockPlaceContext context) {
+    public static boolean buildSaver(BlockPlaceContext context) {
         BlockPos pos = context.getClickedPos();
+        boolean disp = false;
         if (tempBuild == null) {
             dir = context.getClickedFace();
             tempBuild = new ArrayList<>();
             RelPos.setBase(pos);
+            disp = true;
         }
         RelPos rel = new RelPos(pos);
         final boolean[] containerCheck = {true};
@@ -100,5 +102,6 @@ public class RePlacerConfig {
             if (r.equals(rel)) containerCheck[0] = false;
         });
         if (containerCheck[0]) tempBuild.add(rel);
+        return disp;
     }
 }

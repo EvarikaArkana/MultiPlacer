@@ -7,8 +7,20 @@ import net.minecraft.world.phys.Vec3;
 public class RelPos {
     private final int[] pos = new int[3];
     private static BlockPos basePos;
+    private static Vec3 baseVec;
 
-    public static void setBase(BlockPos p) {basePos = p;}
+    public static void setBase(BlockPos p) {
+        basePos = p;
+    }
+
+    public static void setBase(Vec3 v, BlockPos p) {
+        basePos = p;
+        baseVec = new Vec3(
+                v.x() - p.getX(),
+                v.y() - p.getY(),
+                v.z() - p.getZ()
+        );
+    }
 
     public RelPos(BlockPos pos) {
         this.pos[0] = pos.getX() - basePos.getX();
@@ -23,7 +35,12 @@ public class RelPos {
     }
 
     public Vec3 vec() {
-        return pos().getCenter();
+        Vec3 v = pos().getCenter();
+        return new Vec3(
+                v.x() + baseVec.x(),
+                v.y() + baseVec.y(),
+                v.z() + baseVec.z()
+        );
     }
 
     public BlockPos pos() {
