@@ -10,6 +10,7 @@ import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.phys.BlockHitResult;
 import org.spongepowered.asm.mixin.Mixin;
@@ -36,15 +37,17 @@ public class BlockItemMixin {
         if (rePlacing)
             return;
         if (reCording) {
-            buildSaver(context);
+            if (buildSaver(context)) {
+                assert context.getPlayer() != null;
+                context.getPlayer().displayClientMessage(Component.literal("Central block saved!"), true);
+            }
             return;
         }
         if (!isHeldOrToggled()) return;
-        BlockPos pos0 = context.getClickedPos();
         Player player = context.getPlayer();
         assert player != null;
         rePlacing = true;
-        RelPos.setBase(pos0);
+        RelPos.setBase(context.getClickLocation(), context.getClickedPos());
         try {
             setBaseDir(context.getClickedFace());
             BuildHolder build = rotate(getBuild());
@@ -52,6 +55,7 @@ public class BlockItemMixin {
                 if (pos.equals(new RelPos(new int[]{0,0,0}))) {
                     continue;
                 }
+                if (context.getItemInHand().isEmpty()) break;
                 if (player.level().getBlockState(pos.pos()).canBeReplaced()) {
                     blit.place(new BlockPlaceContext(
                                     player,
