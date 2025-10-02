@@ -6,6 +6,7 @@ import eva.replacer.util.RelPos;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
 
@@ -14,7 +15,8 @@ import static eva.replacer.config.JsonConfigHelper.*;
 public class RePlacerConfig {
     static int ver = 0;
     private int v = ver;
-    private boolean rotate = true;
+    private boolean rotateFace = true;
+    private boolean rotatePlace = true;
     private List<String> names =  new ArrayList<>();
 
     public static int selection = 0;
@@ -22,7 +24,8 @@ public class RePlacerConfig {
     static String buildName;
     private static List<RelPos> tempBuild;
     private static RePlacerConfig INSTANCE;
-    private static Direction dir;
+    private static Direction placeDir;
+    private static Direction faceDir;
 
     public static RePlacerConfig getInstance() {
         if (INSTANCE == null) {
@@ -32,17 +35,25 @@ public class RePlacerConfig {
     }
 
     void updateConfigs(RePlacerConfig config) {
-        this.v = config.v;
-        this.rotate = config.rotate;
+        this.rotateFace = config.rotateFace;
+        this.rotatePlace = config.rotatePlace;
         this.names = config.names;
     }
 
-    public static boolean isRotate() {
-        return getInstance().rotate;
+    public static boolean isRotateFace() {
+        return getInstance().rotateFace;
     }
 
-    static void setRotate(boolean rotate) {
-        getInstance().rotate = rotate;
+    static void setRotateFace(boolean rotate) {
+        getInstance().rotateFace = rotate;
+    }
+
+    public static boolean isRotatePlace() {
+        return getInstance().rotatePlace;
+    }
+
+    static void setRotatePlace(boolean rotate) {
+        getInstance().rotatePlace = rotate;
     }
 
     public static List<String> getNames() {return getInstance().names;}
@@ -58,10 +69,10 @@ public class RePlacerConfig {
         }
     }
 
-    public static void saveBuild(boolean confirm) {
+    public static void saveBuild(boolean deny) {
         try {
-            if (confirm) {
-                writeBuild(buildName, dir, tempBuild.toArray(new RelPos[0]));
+            if (!deny) {
+                writeBuild(buildName, new BuildHolder(placeDir, faceDir, tempBuild.toArray(new RelPos[0])));
                 RePlacerClient.LOGGER.info("Saved {}!", buildName);
                 getInstance().names.add(buildName);
             }
@@ -71,7 +82,8 @@ public class RePlacerConfig {
         buildName = null;
         tempBuild = null;
         reCording = false;
-        dir = null;
+        placeDir = null;
+        faceDir = null;
         RePlacerClient.LOGGER.info("Purged temp vars");
     }
 
@@ -94,7 +106,11 @@ public class RePlacerConfig {
         BlockPos pos = context.getClickedPos();
         boolean disp = false;
         if (tempBuild == null) {
-            dir = context.getClickedFace();
+            placeDir = context.getClickedFace();
+            if (placeDir.getAxis() == Direction.Axis.Y) {
+                assert context.getPlayer() != null;
+                faceDir = context.getPlayer().getDirection();
+            }
             tempBuild = new ArrayList<>();
             RelPos.setBase(pos);
             disp = true;
@@ -106,5 +122,77 @@ public class RePlacerConfig {
         });
         if (containerCheck[0]) tempBuild.add(rel);
         return disp;
+    }
+
+    public static String buildDefault() {
+        return "{\n" +
+                "  \"firstDir\": \"UP\",\n" +
+                "  \"faceDir\": \"null\",\n" +
+                "  \"posList\": [\n" +
+                "    {\n" +
+                "      \"pos\": [\n" +
+                "        0,\n" +
+                "        0,\n" +
+                "        0\n" +
+                "      ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"pos\": [\n" +
+                "        1,\n" +
+                "        0,\n" +
+                "        0\n" +
+                "      ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"pos\": [\n" +
+                "        -1,\n" +
+                "        0,\n" +
+                "        0\n" +
+                "      ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"pos\": [\n" +
+                "        0,\n" +
+                "        0,\n" +
+                "        1\n" +
+                "      ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"pos\": [\n" +
+                "        -1,\n" +
+                "        0,\n" +
+                "        1\n" +
+                "      ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"pos\": [\n" +
+                "        1,\n" +
+                "        0,\n" +
+                "        1\n" +
+                "      ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"pos\": [\n" +
+                "        1,\n" +
+                "        0,\n" +
+                "        -1\n" +
+                "      ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"pos\": [\n" +
+                "        0,\n" +
+                "        0,\n" +
+                "        -1\n" +
+                "      ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"pos\": [\n" +
+                "        -1,\n" +
+                "        0,\n" +
+                "        -1\n" +
+                "      ]\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
     }
 }

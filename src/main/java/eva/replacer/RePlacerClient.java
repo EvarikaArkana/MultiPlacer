@@ -1,10 +1,12 @@
 package eva.replacer;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.terraformersmc.modmenu.ModMenu;
 import eva.replacer.config.JsonConfigHelper;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
@@ -21,10 +23,13 @@ public class RePlacerClient implements ClientModInitializer {
     public static KeyMapping cycleBind;
     public static KeyMapping modifierToggle;
     private static boolean toggled = false;
+    private static boolean modMenu = false;
     @Override
     public void onInitializeClient() {
 
         JsonConfigHelper.init();
+
+        modMenu = FabricLoader.getInstance().isModLoaded("modmenu");
         // This entrypoint is suitable for setting up client-specific logic, such as rendering.
          modifierBind = KeyBindingHelper.registerKeyBinding(new KeyMapping(
                 "RePlacer Modifier Key",
@@ -46,8 +51,15 @@ public class RePlacerClient implements ClientModInitializer {
          ));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (cycleBind.consumeClick()) {
-                assert client.player != null;
+            assert client.player != null;
+            if (modMenu && modifierBind.isDown() && cycleBind.consumeClick()) {
+                if (reCording) {
+                    client.setScreen(ModMenu.getConfigScreen("rp", client.screen));
+                } else {
+                    client.player.displayClientMessage(Component.literal("Recording started!"), true);
+                    reCording = true;
+                }
+            } else if (cycleBind.consumeClick()) {
                 if (client.player.isShiftKeyDown()) {
                     selection--;
                     if (selection < 0) selection = getNames().size() - 1;
@@ -65,9 +77,9 @@ public class RePlacerClient implements ClientModInitializer {
                     client.player.displayClientMessage(Component.literal("swapped to square"), true);
                 }
             }
-                if  (modifierToggle.consumeClick()) {
-                    toggled = !toggled;
-                }
+            if (modifierToggle.consumeClick()) {
+                toggled = !toggled;
+            }
         });
     }
 

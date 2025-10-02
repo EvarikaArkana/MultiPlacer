@@ -28,10 +28,14 @@ public class RelPos {
         this.pos[2] = pos.getZ() - basePos.getZ();
     }
 
-    public RelPos(int[] pos) {
-        this.pos[0] = pos[0];
-        this.pos[1] = pos[1];
-        this.pos[2] = pos[2];
+    public RelPos(int... pos) {
+        try {
+            this.pos[0] = pos[0];
+            this.pos[1] = pos[1];
+            this.pos[2] = pos[2];
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Vec3 vec() {
