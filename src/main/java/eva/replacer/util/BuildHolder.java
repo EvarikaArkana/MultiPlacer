@@ -52,7 +52,7 @@ public record BuildHolder(Direction firstDir, @Nullable Direction faceDir, RelPo
         if (facing.getAxis() == this.faceDir.getAxis()) {
             return new RelPos(-pos.vals()[0], pos.vals()[1], -pos.vals()[2]);
         }
-        if (this.faceDir.getCounterClockWise() == facing) {
+        if (this.faceDir.getClockWise() == facing) {
             return new RelPos(-pos.vals()[2], pos.vals()[1], pos.vals()[0]);
         } else
             return new RelPos(pos.vals()[2], pos.vals()[1], -pos.vals()[0]);
@@ -66,11 +66,11 @@ public record BuildHolder(Direction firstDir, @Nullable Direction faceDir, RelPo
                 action.accept(rotateFace(rotatePlace(pos)));
             else {
                 if (isRotateFace() && this.firstDir.getAxis() == Direction.Axis.Y) {
-                    Direction temp1 = baseDir;
+                    Direction temp = baseDir;
                     baseDir = firstDir();
                     pos = rotateFace(pos);
-                    baseDir = temp1;
-                    if (firstDir == Direction.UP)
+                    baseDir = temp;
+                    if (firstDir.getAxis() == Direction.Axis.Y)
                         pos = new RelPos(-pos.vals()[0], pos.vals()[1], -pos.vals()[2]);
                 }
                 action.accept(rotatePlace(pos));

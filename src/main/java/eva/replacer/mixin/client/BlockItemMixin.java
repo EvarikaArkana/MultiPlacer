@@ -66,7 +66,7 @@ public class BlockItemMixin {
                 setFacing(player.getDirection());
             getBuild().rotateEach(pos -> {
                 if (!context.getItemInHand().isEmpty())
-                    if (player.distanceToSqr(pos.vec()) <= player.getAttributeValue(Attributes.BLOCK_INTERACTION_RANGE) * 2)
+                    if (player.canInteractWithBlock(pos.pos(), player.blockInteractionRange() * 1.2))
                         if (!pos.equals(new RelPos(0, 0, 0)))
                             if (player.level().getBlockState(pos.pos()).canBeReplaced()) {
                                 blit.place(new BlockPlaceContext(
