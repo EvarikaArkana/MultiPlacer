@@ -3,7 +3,6 @@ package eva.replacer.rendering;
 import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.platform.DepthTestFunction;
-import com.mojang.blaze3d.shaders.UniformType;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -34,16 +33,15 @@ import java.util.HashSet;
 import java.util.OptionalDouble;
 
 import static eva.replacer.config.RePlacerConfig.getBuild;
+import static eva.replacer.config.RePlacerConfig.reCording;
 import static eva.replacer.rendering.BoundingBoxMerger.merge;
 
 public class BlockHighlightRenderer {
     private static final RenderType LINES_NORMAL = RenderType.lines();
     private static final RenderPipeline TRANSPARENT_LINES_PIPELINE =
-            RenderPipelines.register(RenderPipeline.builder(RenderPipelines.MATRICES_COLOR_FOG_SNIPPET)
+            RenderPipelines.register(RenderPipeline.builder(RenderPipelines.MATRICES_FOG_SNIPPET)
                     .withVertexShader("core/rendertype_lines")
                     .withFragmentShader("core/rendertype_lines")
-                    .withUniform("LineWidth", UniformType.FLOAT)
-                    .withUniform("ScreenSize", UniformType.VEC2)
                     .withBlend(BlendFunction.TRANSLUCENT)
                     .withCull(false)
                     .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
@@ -61,6 +59,7 @@ public class BlockHighlightRenderer {
     );
 
     public static boolean renderRePlacerBox(PoseStack poseStack) {
+        if (reCording) return true;
         Minecraft mc = Minecraft.getInstance();
         Level level = mc.level;
         Player player = mc.player;
