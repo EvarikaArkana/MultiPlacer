@@ -20,6 +20,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static eva.replacer.RePlacerClient.isHeldOrToggled;
+import static eva.replacer.config.JsonConfigHelper.writeSquare;
 import static eva.replacer.config.RePlacerConfig.*;
 import static eva.replacer.util.BuildHolder.rotate;
 import static eva.replacer.util.BuildHolder.setBaseDir;
@@ -74,7 +75,9 @@ public class BlockItemMixin {
             }
         } catch (Exception ignored) {
             RePlacerClient.LOGGER.info("Failed to get build!");
-            player.displayClientMessage(Component.literal("Failed to get build!"), false);
+            player.displayClientMessage(Component.literal("Failed to get build!"), true);
+            player.displayClientMessage(Component.literal("Writing default build."), false);
+            writeSquare();
         }
         setBaseDir(null);
         rePlacing = false;
