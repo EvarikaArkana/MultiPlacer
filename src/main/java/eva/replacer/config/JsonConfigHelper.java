@@ -6,13 +6,13 @@ import eva.replacer.RePlacerClient;
 import eva.replacer.util.BuildHolder;
 import eva.replacer.util.RelPos;
 import net.minecraft.core.Direction;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
+import static eva.replacer.config.RePlacerConfig.getNames;
 import static eva.replacer.util.BuildHolder.buildDefault;
 
 public class JsonConfigHelper {
@@ -91,8 +91,8 @@ public class JsonConfigHelper {
         if (buildFolder.isDirectory()) {
             final Hashtable<String, File> tempBuilds =  new Hashtable<>();
             List<String> names =  new ArrayList<>();
-            if (RePlacerConfig.getNames() == null || RePlacerConfig.getNames().isEmpty()) return;
-            for (String name : RePlacerConfig.getNames()) {
+            if (getNames() == null || getNames().isEmpty()) return;
+            for (String name : getNames()) {
                 File file = new  File(buildFolder, name + ".json");
                 boolean seemsValid;
                 if (file.exists()) {
@@ -123,6 +123,7 @@ public class JsonConfigHelper {
 
     static void deleteBuild(String name) {
         builds.get(name).delete();
+        builds.remove(name);
     }
 
     static void writeBuild(String name, Direction dir, RelPos[] build) {
@@ -138,25 +139,34 @@ public class JsonConfigHelper {
     }
 
     public static void writeSquare() {
-        if (builds.get("square") == null)
+        try {
+            configGson.fromJson(new FileReader(builds.get("square")), BuildHolder.class);
+            if (getNames().isEmpty()) {
+                List<String> names = new ArrayList<>();
+                names.add("square");
+                RePlacerConfig.setNames(names);
+            }
+        } catch (Exception ignored) {
             try {
                 RePlacerClient.LOGGER.info("Writing default build at './config/RePlacerBuilds/square.json'.");
                 builds.put("square", new File(buildFolder, "square.json"));
                 FileWriter writer = new FileWriter(builds.get("square"), false);
                 writer.write(buildDefault());
                 writer.close();
-                RePlacerConfig.setNames(new ArrayList<>(builds.keySet()));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+                List<String> names = new ArrayList<>();
+                names.add("square");
+                RePlacerConfig.setNames(names);
+            } catch (Exception f) {
+                throw new RuntimeException(f);
             }
+        }
     }
 
     static BuildHolder readBuild(String name) {
         try {
             return configGson.fromJson(new FileReader(builds.get(name)), BuildHolder.class);
         } catch (FileNotFoundException e) {
-            writeSquare();
-            return null;
+            throw new RuntimeException(e);
         }
     }
 }

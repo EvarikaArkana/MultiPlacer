@@ -3,14 +3,11 @@ package eva.replacer.mixin.client;
 import eva.replacer.RePlacerClient;
 import eva.replacer.util.BuildHolder;
 import eva.replacer.util.RelPos;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.phys.BlockHitResult;
 import org.spongepowered.asm.mixin.Mixin;
@@ -30,11 +27,16 @@ public class BlockItemMixin {
 
     @Unique private final BlockItem blit = (BlockItem) (Object) this;
     @Unique private boolean rePlacing = false;
+    @Unique private boolean no = false;
     @Inject(
             method = "place",
             at = @At("TAIL")
     )
     private void placeAgain(BlockPlaceContext context, CallbackInfoReturnable<InteractionResult> cir) {
+        if (no) {
+            no = false;
+            return;
+        }
         if (rePlacing)
             return;
         if (reCording) {
@@ -47,6 +49,14 @@ public class BlockItemMixin {
         if (!isHeldOrToggled()) return;
         Player player = context.getPlayer();
         assert player != null;
+        if (getBuild() == null) {
+            RePlacerClient.LOGGER.info("Failed to get build!");
+            player.displayClientMessage(Component.literal("Failed to get build!"), true);
+            player.displayClientMessage(Component.literal("Writing default build."), false);
+            writeSquare();
+            no = true;
+            return;
+        }
         rePlacing = true;
         RelPos.setBase(context.getClickLocation(), context.getClickedPos());
         try {
@@ -73,12 +83,7 @@ public class BlockItemMixin {
                     player.awardStat(Stats.ITEM_USED.get(blit));
                 }
             }
-        } catch (Exception ignored) {
-            RePlacerClient.LOGGER.info("Failed to get build!");
-            player.displayClientMessage(Component.literal("Failed to get build!"), true);
-            player.displayClientMessage(Component.literal("Writing default build."), false);
-            writeSquare();
-        }
+        } catch (Exception ignored) {}
         setBaseDir(null);
         rePlacing = false;
     }
