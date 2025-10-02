@@ -55,8 +55,6 @@ public class JsonConfigHelper {
                     FileWriter writer = new FileWriter(rePlacerConfig);
                     writer.write(json);
                     writer.close();
-                    RePlacerClient.LOGGER.info("Writing default build at './config/RePlacerBuilds/square.json'.");
-                    writeSquare();
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -87,7 +85,8 @@ public class JsonConfigHelper {
     }
 
     static void createBuilds() {
-        if (!buildFolder.exists()) buildFolder.mkdir();
+        boolean writeDefault = false;
+        if (!buildFolder.exists()) writeDefault = buildFolder.mkdir();
 
         if (buildFolder.isDirectory()) {
             final Hashtable<String, File> tempBuilds =  new Hashtable<>();
@@ -119,6 +118,11 @@ public class JsonConfigHelper {
             }
             builds.putAll(tempBuilds);
             RePlacerConfig.setNames(new ArrayList<>(builds.keySet()));
+
+            if (writeDefault) {
+                RePlacerClient.LOGGER.info("Writing default build at './config/RePlacerBuilds/square.json'.");
+                writeSquare();
+            }
         }
     }
 
@@ -144,6 +148,7 @@ public class JsonConfigHelper {
             FileWriter writer = new FileWriter(builds.get("square"), false);
             writer.write(buildDefault());
             writer.close();
+            RePlacerConfig.setNames(new ArrayList<>(builds.keySet()));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
