@@ -13,7 +13,7 @@ import java.nio.file.Path;
 import java.util.*;
 
 import static eva.replacer.config.RePlacerConfig.getNames;
-import static eva.replacer.util.BuildHolder.buildDefault;
+import static eva.replacer.config.RePlacerConfig.buildDefault;
 
 public class JsonConfigHelper {
     private static final File folder = new File("config");
@@ -126,10 +126,10 @@ public class JsonConfigHelper {
         builds.remove(name);
     }
 
-    static void writeBuild(String name, Direction dir, RelPos[] build) {
+    static void writeBuild(String name, BuildHolder holder) {
         try {
             builds.put(name, new File(buildFolder, name + ".json"));
-            String json = configGson.toJson(new BuildHolder(dir, build));
+            String json = configGson.toJson(holder);
             FileWriter writer = new FileWriter(builds.get(name), false);
             writer.write(json);
             writer.close();
@@ -142,7 +142,7 @@ public class JsonConfigHelper {
         try {
             configGson.fromJson(new FileReader(builds.get("square")), BuildHolder.class);
             if (getNames().isEmpty()) {
-                List<String> names = new ArrayList<>();
+                List<String> names = getNames();
                 names.add("square");
                 RePlacerConfig.setNames(names);
             }
@@ -153,7 +153,7 @@ public class JsonConfigHelper {
                 FileWriter writer = new FileWriter(builds.get("square"), false);
                 writer.write(buildDefault());
                 writer.close();
-                List<String> names = new ArrayList<>();
+                List<String> names = getNames();
                 names.add("square");
                 RePlacerConfig.setNames(names);
             } catch (Exception f) {

@@ -38,7 +38,7 @@
     "java": ">=21"
   },
   "suggests": {
-
+    "modmenu": "*"
   },
   "breaks": {
 
@@ -53,7 +53,8 @@
       "modrinth": "QZEAWDAW",
       "curseforge": 1353044,
       "dependencies": [
-
+        "modmenu(recommended){modrinth:modmenu}",
+        "modmenu(recommended){curseforge:modmenu}"
       ]
     }
   },
