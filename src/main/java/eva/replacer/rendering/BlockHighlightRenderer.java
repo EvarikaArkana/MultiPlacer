@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.OptionalDouble;
 
 import static eva.replacer.config.RePlacerConfig.getBuild;
+import static eva.replacer.config.RePlacerConfig.reCording;
 import static eva.replacer.rendering.BoundingBoxMerger.merge;
 import static net.minecraft.client.renderer.RenderStateShard.*;
 
@@ -68,6 +69,7 @@ public class BlockHighlightRenderer {
     );
 
     public static boolean renderRePlacerBox(PoseStack poseStack) {
+        if (reCording) return true;
         Minecraft mc = Minecraft.getInstance();
         Level level = mc.level;
         Player player = mc.player;
