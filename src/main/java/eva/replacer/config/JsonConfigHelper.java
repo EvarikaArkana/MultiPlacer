@@ -137,7 +137,7 @@ public class JsonConfigHelper {
         }
     }
 
-    static void writeSquare() {
+    public static void writeSquare() {
         if (builds.get("square") == null)
             try {
                 RePlacerClient.LOGGER.info("Writing default build at './config/RePlacerBuilds/square.json'.");
@@ -151,12 +151,12 @@ public class JsonConfigHelper {
             }
     }
 
-    @NotNull
     static BuildHolder readBuild(String name) {
         try {
             return configGson.fromJson(new FileReader(builds.get(name)), BuildHolder.class);
         } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
+            writeSquare();
+            return null;
         }
     }
 }

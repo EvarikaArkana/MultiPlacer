@@ -50,7 +50,6 @@ public class RePlacerConfig {
 
     static void setNames(List<String> names) {getInstance().names = names;}
 
-    @NotNull
     public static BuildHolder getBuild() {
         return readBuild(getInstance().names.get(selection));
     }

@@ -11,6 +11,7 @@ import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static eva.replacer.config.JsonConfigHelper.writeSquare;
 import static eva.replacer.config.RePlacerConfig.*;
 
 public class RePlacerClient implements ClientModInitializer {
@@ -57,7 +58,11 @@ public class RePlacerClient implements ClientModInitializer {
                 try {
                     client.player.displayClientMessage(Component.literal("swapped to " + getNames().get(selection)), true);
                 } catch (Exception ignored) {
-                    client.player.displayClientMessage(Component.literal("No builds registered!"), true);
+                    client.player.displayClientMessage(Component.literal("No builds registered!"), false);
+                    client.player.displayClientMessage(Component.literal("Loading default build"), false);
+                    writeSquare();
+                    selection = 0;
+                    client.player.displayClientMessage(Component.literal("swapped to " + getNames().get(selection)), true);
                 }
             }
                 if  (modifierToggle.consumeClick()) {
