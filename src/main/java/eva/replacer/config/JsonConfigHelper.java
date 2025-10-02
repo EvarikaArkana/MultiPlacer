@@ -27,6 +27,7 @@ public class JsonConfigHelper {
         readFromConfig();
         writeToConfig();
         createBuilds();
+        writeSquare();
     }
 
     private static void createConfig() {
@@ -85,8 +86,7 @@ public class JsonConfigHelper {
     }
 
     static void createBuilds() {
-        boolean writeDefault = false;
-        if (!buildFolder.exists()) writeDefault = buildFolder.mkdir();
+        if (!buildFolder.exists()) buildFolder.mkdir();
 
         if (buildFolder.isDirectory()) {
             final Hashtable<String, File> tempBuilds =  new Hashtable<>();
@@ -118,11 +118,6 @@ public class JsonConfigHelper {
             }
             builds.putAll(tempBuilds);
             RePlacerConfig.setNames(new ArrayList<>(builds.keySet()));
-
-            if (writeDefault) {
-                RePlacerClient.LOGGER.info("Writing default build at './config/RePlacerBuilds/square.json'.");
-                writeSquare();
-            }
         }
     }
 
@@ -143,15 +138,17 @@ public class JsonConfigHelper {
     }
 
     static void writeSquare() {
-        try {
-            builds.put("square", new File(buildFolder, "square.json"));
-            FileWriter writer = new FileWriter(builds.get("square"), false);
-            writer.write(buildDefault());
-            writer.close();
-            RePlacerConfig.setNames(new ArrayList<>(builds.keySet()));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        if (builds.get("square") == null)
+            try {
+                RePlacerClient.LOGGER.info("Writing default build at './config/RePlacerBuilds/square.json'.");
+                builds.put("square", new File(buildFolder, "square.json"));
+                FileWriter writer = new FileWriter(builds.get("square"), false);
+                writer.write(buildDefault());
+                writer.close();
+                RePlacerConfig.setNames(new ArrayList<>(builds.keySet()));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
     }
 
     @NotNull
