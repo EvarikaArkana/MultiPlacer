@@ -62,7 +62,7 @@ public class RePlacerClient implements ClientModInitializer {
                     client.player.displayClientMessage(Component.literal("Loading default build"), false);
                     writeSquare();
                     selection = 0;
-                    client.player.displayClientMessage(Component.literal("swapped to " + getNames().get(selection)), true);
+                    client.player.displayClientMessage(Component.literal("swapped to square"), true);
                 }
             }
                 if  (modifierToggle.consumeClick()) {

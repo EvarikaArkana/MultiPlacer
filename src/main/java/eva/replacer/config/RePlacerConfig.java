@@ -6,7 +6,6 @@ import eva.replacer.util.RelPos;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -51,7 +50,12 @@ public class RePlacerConfig {
     static void setNames(List<String> names) {getInstance().names = names;}
 
     public static BuildHolder getBuild() {
-        return readBuild(getInstance().names.get(selection));
+        try {
+            return readBuild(getInstance().names.get(selection));
+        } catch (Exception e) {
+            writeSquare();
+            return null;
+        }
     }
 
     public static void saveBuild(boolean confirm) {
