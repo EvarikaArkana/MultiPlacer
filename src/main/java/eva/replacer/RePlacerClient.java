@@ -7,10 +7,10 @@ import eva.replacer.rendering.BlockHighlightRenderer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +26,7 @@ public class RePlacerClient implements ClientModInitializer {
     public static KeyMapping modifierToggle;
     private static boolean toggled = false;
     private static boolean modMenu = false;
+    private static final KeyMapping.Category REPLACER_KEYS = new KeyMapping.Category(ResourceLocation.tryBuild("eva", "replacer"));
     @Override
     public void onInitializeClient() {
 
@@ -37,19 +38,19 @@ public class RePlacerClient implements ClientModInitializer {
                 "RePlacer Modifier Key",
                 InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_LEFT_ALT,
-                "RePlacer"
+                 REPLACER_KEYS
          ));
          cycleBind = KeyBindingHelper.registerKeyBinding(new KeyMapping(
                  "RePlacer Cycle Key",
                  InputConstants.Type.KEYSYM,
                  GLFW.GLFW_KEY_Z,
-                 "RePlacer"
+                 REPLACER_KEYS
          ));
          modifierToggle = KeyBindingHelper.registerKeyBinding(new KeyMapping(
                  "RePlacer Modifier Toggle Key",
                  InputConstants.Type.KEYSYM,
                  GLFW.GLFW_KEY_UNKNOWN,
-                 "RePlacer"
+                 REPLACER_KEYS
          ));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
@@ -83,9 +84,6 @@ public class RePlacerClient implements ClientModInitializer {
                 toggled = !toggled;
             }
         });
-
-        WorldRenderEvents.BLOCK_OUTLINE.register((worldRenderContext, blockOutlineContext) -> BlockHighlightRenderer.renderRePlacerBox(
-                worldRenderContext.matrixStack()));
     }
 
     public static boolean isHeldOrToggled() {
