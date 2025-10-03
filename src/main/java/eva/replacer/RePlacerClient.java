@@ -56,7 +56,9 @@ public class RePlacerClient implements ClientModInitializer {
             assert client.player != null;
             if (modMenu && modifierBind.isDown() && cycleBind.consumeClick()) {
                 if (reCording) {
-                    client.setScreen(ModMenu.getConfigScreen("rp", client.screen));
+                    try {
+                        client.setScreen(ModMenu.getConfigScreen("rp", client.screen));
+                    }catch (Exception e) {LOGGER.info("Update cloth or mod menu!");}
                 } else {
                     client.player.displayClientMessage(Component.literal("Recording started!"), true);
                     reCording = true;
